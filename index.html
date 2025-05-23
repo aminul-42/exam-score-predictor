@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam Score Prediction</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #000;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    /* Raining Code Animation */
+    #rain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.7;
+    }
+    /* Motivational Quote */
+    .motivational {
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, rgba(0, 255, 127, 0.2), rgba(0, 191, 255, 0.2));
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(0, 255, 127, 0.8);
+      opacity: 0.8;
+    }
+    /* Form Container */
+    .container {
+      background: rgba(20, 20, 20, 0.9);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 255, 127, 0.3);
+      width: 100%;
+      max-width: 450px;
+      z-index: 1;
+    }
+    h1 {
+      text-align: center;
+      color: #0f0;
+      font-size: 2rem;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(0, 255, 127, 0.5);
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #0f0;
+      font-size: 1rem;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      background: #111;
+      border: 2px solid #0f0;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: box-shadow 0.3s ease;
+    }
+    input[type="number"]:focus {
+      box-shadow: 0 0 15px rgba(0, 255, 127, 0.8);
+    }
+    input::placeholder {
+      color: #888;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(45deg, #00ff7f, #00bfff);
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.3s;
+    }
+    button:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(0, 255, 127, 0.8);
+    }
+    button:disabled {
+      background: linear-gradient(45deg, #666, #888);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .result, .error {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 1rem;
+      animation: fadeIn 0.5s ease-in;
+    }
+    .result {
+      background: rgba(0, 255, 127, 0.2);
+      color: #0f0;
+      border: 1px solid #0f0;
+    }
+    .error {
+      background: rgba(255, 0, 0, 0.2);
+      color: #f00;
+      border: 1px solid #f00;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+        max-width: 90%;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      .motivational {
+        font-size: 1rem;
+        padding: 8px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="rain"></canvas>
+  <div class="motivational">Your hard work shapes your future</div>
+  <div class="container">
+    <h1>Exam Score Prediction</h1>
+    <form id="prediction-form">
+      <div class="form-group">
+        <label for="hours">Hours of Study:</label>
+        <input type="number" id="hours" step="any" placeholder="Enter hours (e.g., 5.5)" required>
+      </div>
+      <button type="submit" id="predict-btn">Predict Score</button>
+    </form>
+    <div id="result" class="result" style="display: none;"></div>
+    <div id="error" class="error" style="display: none;"></div>
+  </div>
+  <script>
+    // Raining Code Animation
+    const canvas = document.getElementById('rain');
+    const ctx = canvas.getContext('2d');
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+    function draw() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#0f0';
+      ctx.font = `${fontSize}px monospace`;
+      for (let i = 0; i < drops.length; i++) {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+    setInterval(draw, 33);
+    window.addEventListener('resize', () => {
+      canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth;
+    });
+
+    // Form Logic
+    const form = document.getElementById('prediction-form');
+    const predictBtn = document.getElementById('predict-btn');
+    const resultDiv = document.getElementById('result');
+    const errorDiv = document.getElementById('error');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      predictBtn.disabled = true;
+      predictBtn.textContent = 'Predicting...';
+      resultDiv.style.display = 'none';
+      errorDiv.style.display = 'none';
+      resultDiv.textContent = '';
+      errorDiv.textContent = '';
+
+      const hours = parseFloat(document.getElementById('hours').value);
+      if (isNaN(hours)) {
+        errorDiv.textContent = 'Please enter a valid number for hours of study';
+        errorDiv.style.display = 'block';
+        predictBtn.disabled = false;
+        predictBtn.textContent = 'Predict Score';
+        return;
+      }
+
+      try {
+        console.log('Sending request to /predict with hours:', hours);
+        const response = await fetch('http://localhost:3149/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hours: hours })
+        });
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        if (response.ok) {
+          resultDiv.textContent = `Predicted Exam Score: ${data.prediction.toFixed(2)}`;
+          resultDiv.style.display = 'block';
+        } else {
+          errorDiv.textContent = data.detail || 'Prediction failed';
+          errorDiv.style.display = 'block';
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+        errorDiv.textContent = 'Failed to connect to the server: ' + err.message;
+        errorDiv.style.display = 'block';
+      }
+      predictBtn.disabled = false;
+      predictBtn.textContent = 'Predict Score';
+    });
+  </script>
+</body>
+</html>
